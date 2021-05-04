@@ -9,15 +9,12 @@ use cgmath::prelude::SquareMatrix;
 use gl::types::{GLfloat, GLsizei, GLsizeiptr};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 
-/*
 mod shader;
 mod vertex;
 
 use shader::Shader;
 use vertex::Vertex;
-*/
 
 #[allow(dead_code)]
 type Point3 = cgmath::Point3<f32>;
@@ -63,10 +60,11 @@ fn main() {
         window.gl_swap_window();
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running
-                },
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
                 _ => {}
             }
         }
