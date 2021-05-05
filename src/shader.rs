@@ -72,7 +72,7 @@ impl Shader {
         if successful {
             Ok(shader)
         } else {
-            Err(shader.log())
+            Err(shader.program_log())
         }
     }
 
@@ -94,14 +94,34 @@ impl Shader {
         if successful {
             Ok(id)
         } else {
-            Err(self.log())
+            Err(self.shader_log())
         }
     }
 
-    fn log(&self) -> String {
+    fn shader_log(&self) -> String {
         let mut len = 0;
         unsafe {
             gl::GetShaderiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
+        }
+        assert!(len > 0);
+
+        let mut buf = Vec::with_capacity(len as usize);
+        let buf_ptr = buf.as_mut_ptr() as *mut gl::types::GLchar;
+        unsafe {
+            gl::GetShaderInfoLog(self.id, len, std::ptr::null_mut(), buf_ptr);
+            buf.set_len(len as usize);
+        };
+
+        match String::from_utf8(buf) {
+            Ok(log) => log,
+            Err(vec) => panic!("Could not convert log from buffer: {}", vec),
+        }
+    }
+
+    fn program_log(&self) -> String {
+        let mut len = 0;
+        unsafe {
+            gl::GetProgramiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
         }
         assert!(len > 0);
 

@@ -6,15 +6,13 @@ use c_str_macro::c_str;
 use cgmath::perspective;
 use cgmath::prelude::SquareMatrix;
 
-use gl::types::{GLfloat, GLsizei, GLsizeiptr};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-mod mesh;
+mod vertex;
 mod shader;
 
-use mesh::Mesh;
-use mesh::MeshBuilder;
+use vertex::VertexArray;
 use shader::Shader;
 
 #[allow(dead_code)]
@@ -26,9 +24,6 @@ type Matrix4 = cgmath::Matrix4<f32>;
 
 const WINDOW_WIDTH: u32 = 1280;
 const WINDOW_HEIGHT: u32 = 720;
-const VERTEX_ELEMENTS_NUM: usize = 3;
-const VERTICES_NUM: usize = 3;
-const BUF_LEN: usize = VERTEX_ELEMENTS_NUM * VERTICES_NUM;
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -49,11 +44,13 @@ fn main() {
         .build()
         .unwrap();
 
-    let gl_context = window.gl_create_context().unwrap();
+    let _gl_context = window.gl_create_context().unwrap();
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
-    let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl")
+    let shader = Shader::new("res/glsl/triangle.vs.glsl", "res/glsl/triangle.fs.glsl")
         .unwrap_or_else(|e| panic!("{}", e));
+
+    let vao = VertexArray::new();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
@@ -64,6 +61,10 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             shader.use_program();
+
+            gl::BindVertexArray(vao.id);
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            gl::BindVertexArray(0);
         }
         window.gl_swap_window();
         for event in event_pump.poll_iter() {

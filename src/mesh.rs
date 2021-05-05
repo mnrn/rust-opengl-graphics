@@ -48,6 +48,7 @@ pub struct Empty;
 #[allow(dead_code)]
 pub struct Fully;
 
+#[allow(dead_code)]
 pub struct MeshBuilder<Indices, Positions> {
     indices: Vec<f32>,
     pos: Vec<f32>,
@@ -58,6 +59,7 @@ pub struct MeshBuilder<Indices, Positions> {
     state: (PhantomData<Indices>, PhantomData<Positions>),
 }
 
+#[allow(dead_code)]
 impl MeshBuilder<Empty, Empty> {
     pub fn new() -> Self {
         MeshBuilder {
@@ -72,6 +74,7 @@ impl MeshBuilder<Empty, Empty> {
     }
 }
 
+#[allow(dead_code)]
 impl MeshBuilder<Fully, Fully> {
     pub fn build(self) -> Mesh {
         let mut vao = 0;
@@ -127,6 +130,7 @@ impl MeshBuilder<Fully, Fully> {
     }
 }
 
+#[allow(dead_code)]
 impl<Positions> MeshBuilder<Empty, Positions> {
     pub fn indices(mut self, indices: &[f32]) -> MeshBuilder<Fully, Positions> {
         self.indices.copy_from_slice(indices);
@@ -142,6 +146,7 @@ impl<Positions> MeshBuilder<Empty, Positions> {
     }
 }
 
+#[allow(dead_code)]
 impl<Indices> MeshBuilder<Indices, Empty> {
     pub fn positions(mut self, pos: &[f32]) -> MeshBuilder<Indices, Empty> {
         self.pos.copy_from_slice(pos);
