@@ -61,10 +61,8 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             shader.use_program();
-
-            gl::BindVertexArray(vao.id);
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
-            gl::BindVertexArray(0);
+            
+            vao.draw_arrays(gl::TRIANGLES, 0, 3);
         }
         window.gl_swap_window();
         for event in event_pump.poll_iter() {

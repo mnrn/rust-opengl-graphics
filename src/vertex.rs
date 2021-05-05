@@ -1,4 +1,5 @@
 use gl;
+use gl::types::*;
 
 pub struct VertexArray {
     pub id: u32,
@@ -21,6 +22,26 @@ impl VertexArray {
         }
         VertexArray {
             id: vao
+        }
+    }
+
+    pub fn draw_arrays(&self, mode: GLenum, first: GLint, count: GLsizei) {
+        unsafe {
+            gl::BindVertexArray(self.id);
+            gl::DrawArrays(mode, first, count);
+            gl::BindVertexArray(0);
+        }
+    }
+    pub fn draw_elements(&self, mode: GLenum, count: GLsizei, indices_type: GLenum) {
+        unsafe {
+            gl::BindVertexArray(self.id);
+            gl::DrawElements(
+                mode,
+                count,
+                indices_type,
+                std::ptr::null()
+            );
+            gl::BindVertexArray(0);
         }
     }
 }
