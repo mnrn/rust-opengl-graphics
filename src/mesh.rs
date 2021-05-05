@@ -1,9 +1,8 @@
 use gl;
-use gl::types::*;
 use std;
-use std::vec::Vec;
-use std::marker::PhantomData;
 use std::default::Default;
+use std::marker::PhantomData;
+use std::vec::Vec;
 
 pub struct Mesh {
     vao: u32,
@@ -14,9 +13,7 @@ pub struct Mesh {
 impl Drop for Mesh {
     fn drop(&mut self) {
         unsafe {
-            for x in self.vbo.iter() {
-                gl::DeleteBuffers(1, x);
-            }
+            gl::DeleteBuffers(self.vbo.len() as i32, self.vbo.as_ptr());
             gl::DeleteVertexArrays(1, &self.vao);
         }
     }
@@ -46,14 +43,18 @@ impl Mesh {
     }
 }
 
+#[allow(dead_code)]
 pub struct Empty;
+#[allow(dead_code)]
 pub struct Fully;
+
 pub struct MeshBuilder<Indices, Positions> {
     indices: Vec<f32>,
     pos: Vec<f32>,
     norm: Option<Vec<f32>>,
+    col: Option<Vec<f32>>,
     uv: Option<Vec<f32>>,
-    tang: Option<Vec<f32>>,
+    tan: Option<Vec<f32>>,
     state: (PhantomData<Indices>, PhantomData<Positions>),
 }
 
@@ -63,8 +64,9 @@ impl MeshBuilder<Empty, Empty> {
             indices: Default::default(),
             pos: Default::default(),
             norm: Default::default(),
+            col: Default::default(),
             uv: Default::default(),
-            tang: Default::default(),
+            tan: Default::default(),
             state: (PhantomData, PhantomData),
         }
     }
@@ -80,15 +82,25 @@ impl MeshBuilder<Fully, Fully> {
             gl::GenBuffers(1, &mut index);
             vbo.push(index);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, index);
-            gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, (self.indices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, std::mem::transmute(self.indices.as_ptr()), gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ELEMENT_ARRAY_BUFFER,
+                (self.indices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+                std::mem::transmute(self.indices.as_ptr()),
+                gl::STATIC_DRAW,
+            );
 
             let mut pos = 0;
             gl::GenBuffers(1, &mut pos);
             vbo.push(pos);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, pos);
-            gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, (self.pos.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, std::mem::transmute(self.pos.as_ptr()), gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ELEMENT_ARRAY_BUFFER,
+                (self.pos.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+                std::mem::transmute(self.pos.as_ptr()),
+                gl::STATIC_DRAW,
+            );
 
-            // TODO: norm, uv, tang, ...
+            // TODO: norm, col, uv, tan, ...
 
             // Vertex Array Object
             gl::GenVertexArrays(1, &mut vao);
@@ -102,7 +114,7 @@ impl MeshBuilder<Fully, Fully> {
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null());
             gl::EnableVertexAttribArray(0);
 
-            // TODO: Bind norm, uv, tang, ...
+            // TODO: Bind norm, col, uv, tan, ...
 
             gl::BindVertexArray(0);
         }
@@ -122,23 +134,25 @@ impl<Positions> MeshBuilder<Empty, Positions> {
             indices: self.indices,
             pos: self.pos,
             norm: self.norm,
+            col: self.col,
             uv: self.uv,
-            tang: self.tang,
-            state: (PhantomData, self.state.1)
+            tan: self.tan,
+            state: (PhantomData, self.state.1),
         }
     }
 }
 
 impl<Indices> MeshBuilder<Indices, Empty> {
-    pub fn pos(mut self, pos: &[f32]) -> MeshBuilder<Indices, Empty> {
+    pub fn positions(mut self, pos: &[f32]) -> MeshBuilder<Indices, Empty> {
         self.pos.copy_from_slice(pos);
         MeshBuilder {
             indices: self.indices,
             pos: self.pos,
             norm: self.norm,
+            col: self.col,
             uv: self.uv,
-            tang: self.tang,
-            state: (self.state.0, PhantomData)
+            tan: self.tan,
+            state: (self.state.0, PhantomData),
         }
     }
 }

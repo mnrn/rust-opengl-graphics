@@ -3,6 +3,7 @@ use cgmath::Matrix;
 use gl;
 use gl::types::*;
 
+use std::ffi::CStr;
 use std::fs::File;
 use std::io::Read;
 use std::str;
@@ -82,11 +83,12 @@ impl Shader {
             let ptr_i8: *const i8 = std::mem::transmute(ptr);
             let len = source.len() as GLint;
             gl::ShaderSource(id, 1, &ptr_i8, &len);
+            gl::CompileShader(id);
         }
 
         let successful = unsafe {
             let mut res: GLint = 0;
-            gl::GetProgramiv(id, gl::LINK_STATUS, &mut res);
+            gl::GetShaderiv(id, gl::COMPILE_STATUS, &mut res);
             res != 0
         };
         if successful {
@@ -99,7 +101,7 @@ impl Shader {
     fn log(&self) -> String {
         let mut len = 0;
         unsafe {
-            gl::GetProgramiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
+            gl::GetShaderiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
         }
         assert!(len > 0);
 
@@ -114,5 +116,26 @@ impl Shader {
             Ok(log) => log,
             Err(vec) => panic!("Could not convert log from buffer: {}", vec),
         }
+    }
+
+    pub unsafe fn use_program(&self) {
+        gl::UseProgram(self.id);
+    }
+
+    pub unsafe fn set_vec3(&self, name: &CStr, vec3: &Vector3) {
+        gl::Uniform3fv(
+            gl::GetUniformLocation(self.id, name.as_ptr()),
+            1,
+            vec3.as_ptr(),
+        );
+    }
+
+    pub unsafe fn set_mat4(&self, name: &CStr, mat4: &Matrix4) {
+        gl::UniformMatrix4fv(
+            gl::GetUniformLocation(self.id, name.as_ptr()),
+            1,
+            gl::FALSE,
+            mat4.as_ptr(),
+        );
     }
 }

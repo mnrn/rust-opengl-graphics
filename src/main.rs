@@ -10,11 +10,12 @@ use gl::types::{GLfloat, GLsizei, GLsizeiptr};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-mod shader;
 mod mesh;
+mod shader;
 
-use shader::Shader;
 use mesh::Mesh;
+use mesh::MeshBuilder;
+use shader::Shader;
 
 #[allow(dead_code)]
 type Point3 = cgmath::Point3<f32>;
@@ -50,6 +51,8 @@ fn main() {
 
     let gl_context = window.gl_create_context().unwrap();
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
+
+    let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl");
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
