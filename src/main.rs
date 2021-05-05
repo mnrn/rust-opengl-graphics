@@ -52,13 +52,18 @@ fn main() {
     let gl_context = window.gl_create_context().unwrap();
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
-    let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl");
+    let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl")
+        .unwrap_or_else(|e| panic!("{}", e));
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
         unsafe {
-            gl::ClearColor(0.6, 0.6, 0.6, 1.0);
+            gl::Viewport(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32);
+
+            gl::ClearColor(1.0, 1.0, 1.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
+
+            shader.use_program();
         }
         window.gl_swap_window();
         for event in event_pump.poll_iter() {
