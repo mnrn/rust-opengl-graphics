@@ -3,10 +3,8 @@ use cgmath::Matrix;
 use gl;
 use gl::types::*;
 
-use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::io::Read;
-use std::ptr;
 use std::str;
 
 #[allow(dead_code)]
@@ -73,7 +71,7 @@ impl Shader {
         if successful {
             Ok(shader)
         } else {
-            Err(shader.get_log())
+            Err(shader.log())
         }
     }
 
@@ -86,7 +84,7 @@ impl Shader {
             gl::ShaderSource(id, 1, &ptr_i8, &len);
         }
 
-        let successful = {
+        let successful = unsafe {
             let mut res: GLint = 0;
             gl::GetProgramiv(id, gl::LINK_STATUS, &mut res);
             res != 0
@@ -94,11 +92,11 @@ impl Shader {
         if successful {
             Ok(id)
         } else {
-            Err(self.get_log())
+            Err(self.log())
         }
     }
 
-    fn get_log(&self) -> String {
+    fn log(&self) -> String {
         let mut len = 0;
         unsafe {
             gl::GetProgramiv(self.id, gl::INFO_LOG_LENGTH, &mut len);

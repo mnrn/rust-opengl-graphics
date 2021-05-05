@@ -11,10 +11,10 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 mod shader;
-mod vertex;
+mod mesh;
 
 use shader::Shader;
-use vertex::Vertex;
+use mesh::Mesh;
 
 #[allow(dead_code)]
 type Point3 = cgmath::Point3<f32>;
@@ -37,9 +37,9 @@ fn main() {
     gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
     gl_attr.set_context_version(4, 1);
     let (major, minor) = gl_attr.context_version();
-    println!("OK! Init OpenGL Version = {}.{}", major, minor);
     debug_assert_eq!(gl_attr.context_profile(), sdl2::video::GLProfile::Core);
     debug_assert_eq!(gl_attr.context_version(), (4, 1));
+    println!("OK! Init OpenGL Version = {}.{}", major, minor);
 
     let window = video_subsystem
         .window("App Window", WINDOW_WIDTH, WINDOW_HEIGHT)
