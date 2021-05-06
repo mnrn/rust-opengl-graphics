@@ -10,6 +10,7 @@ impl Drop for Buffer {
         unsafe {
             gl::DeleteBuffers(1, &self.id);
         }
+        println!("Delete Buffer: {}", self.id);
     }
 }
 

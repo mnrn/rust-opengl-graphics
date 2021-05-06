@@ -10,6 +10,7 @@ impl Drop for VertexArray {
         unsafe {
             gl::DeleteVertexArrays(1, &self.id);
         }
+        println!("Delete Vertex Array: {}", self.id);
     }
 }
 

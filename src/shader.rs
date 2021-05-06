@@ -22,6 +22,7 @@ impl Drop for Shader {
         unsafe {
             gl::DeleteProgram(self.id);
         }
+        println!("Delete Shader Program: {}", self.id);
     }
 }
 
