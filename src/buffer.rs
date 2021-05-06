@@ -21,19 +21,25 @@ impl Buffer {
             gl::GenBuffers(1, &mut buf);
             gl::BindBuffer(target, buf);
             gl::BufferData(
-                target, 
+                target,
                 (data.len() * std::mem::size_of::<T>()) as gl::types::GLsizeiptr,
                 std::mem::transmute(data.as_ptr()),
-                usage
+                usage,
             );
         }
         Buffer {
             id: buf,
-            target: target
+            target: target,
         }
     }
 
-    pub unsafe fn vertex_attrib_pointer(&self, index: GLuint, size: GLint, _type: GLenum, stride: GLsizei) {
+    pub unsafe fn vertex_attrib_pointer(
+        &self,
+        index: GLuint,
+        size: GLint,
+        _type: GLenum,
+        stride: GLsizei,
+    ) {
         gl::BindBuffer(self.target, self.id);
         gl::EnableVertexAttribArray(index);
         gl::VertexAttribPointer(index, size, _type, gl::FALSE, stride, std::ptr::null());

@@ -2,8 +2,8 @@ use std::default::Default;
 use std::marker::PhantomData;
 use std::vec::Vec;
 
-use super::vertex::VertexArray;
 use super::buffer::Buffer;
+use super::vertex::VertexArray;
 
 #[allow(dead_code)]
 pub struct Mesh {
@@ -19,7 +19,8 @@ impl Mesh {
     }
 
     pub unsafe fn draw_elements(&self) {
-        self.vao.draw_elements(gl::TRIANGLES, self.verts_num, gl::UNSIGNED_INT, 0);
+        self.vao
+            .draw_elements(gl::TRIANGLES, self.verts_num, gl::UNSIGNED_INT, 0);
     }
 }
 
