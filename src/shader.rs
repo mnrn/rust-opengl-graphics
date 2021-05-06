@@ -1,6 +1,5 @@
 use cgmath::Array;
 use cgmath::Matrix;
-use gl;
 use gl::types::*;
 
 use std::ffi::CStr;
@@ -14,7 +13,7 @@ type Vector3 = cgmath::Vector3<f32>;
 type Matrix4 = cgmath::Matrix4<f32>;
 
 pub struct Shader {
-    pub id: u32,
+    id: u32,
 }
 
 impl Drop for Shader {

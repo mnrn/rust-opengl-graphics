@@ -1,45 +1,25 @@
-use gl;
-use std;
 use std::default::Default;
 use std::marker::PhantomData;
 use std::vec::Vec;
 
-pub struct Mesh {
-    vao: u32,
-    vbo: Vec<u32>,
-    verts_num: i32,
-}
+use super::vertex::VertexArray;
+use super::buffer::Buffer;
 
-impl Drop for Mesh {
-    fn drop(&mut self) {
-        unsafe {
-            gl::DeleteBuffers(self.vbo.len() as i32, self.vbo.as_ptr());
-            gl::DeleteVertexArrays(1, &self.vao);
-        }
-    }
+#[allow(dead_code)]
+pub struct Mesh {
+    vao: VertexArray,
+    vbo: Vec<Buffer>,
+    verts_num: i32,
 }
 
 #[allow(dead_code)]
 impl Mesh {
-    pub fn draw_arrays(&self) {
-        unsafe {
-            gl::BindVertexArray(self.vao);
-            gl::DrawArrays(gl::TRIANGLES, 0, self.verts_num);
-            gl::BindVertexArray(0);
-        }
+    pub unsafe fn draw_arrays(&self) {
+        self.vao.draw_arrays(gl::TRIANGLES, 0, self.verts_num);
     }
 
-    pub fn draw_elements(&self) {
-        unsafe {
-            gl::BindVertexArray(self.vao);
-            gl::DrawElements(
-                gl::TRIANGLES,
-                self.verts_num,
-                gl::UNSIGNED_INT,
-                std::ptr::null(),
-            );
-            gl::BindVertexArray(0);
-        }
+    pub unsafe fn draw_elements(&self) {
+        self.vao.draw_elements(gl::TRIANGLES, self.verts_num, gl::UNSIGNED_INT, 0);
     }
 }
 
@@ -50,7 +30,7 @@ pub struct Fully;
 
 #[allow(dead_code)]
 pub struct MeshBuilder<Indices, Positions> {
-    indices: Vec<f32>,
+    indices: Vec<i32>,
     pos: Vec<f32>,
     norm: Option<Vec<f32>>,
     col: Option<Vec<f32>>,
@@ -77,49 +57,31 @@ impl MeshBuilder<Empty, Empty> {
 #[allow(dead_code)]
 impl MeshBuilder<Fully, Fully> {
     pub fn build(self) -> Mesh {
-        let mut vao = 0;
+        let vao = VertexArray::new();
         let mut vbo = Vec::new();
 
         unsafe {
-            let mut index = 0;
-            gl::GenBuffers(1, &mut index);
+            let index = Buffer::new(gl::ELEMENT_ARRAY_BUFFER, &self.indices, gl::STATIC_DRAW);
             vbo.push(index);
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, index);
-            gl::BufferData(
-                gl::ELEMENT_ARRAY_BUFFER,
-                (self.indices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-                std::mem::transmute(self.indices.as_ptr()),
-                gl::STATIC_DRAW,
-            );
 
-            let mut pos = 0;
-            gl::GenBuffers(1, &mut pos);
-            vbo.push(pos);
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, pos);
-            gl::BufferData(
-                gl::ELEMENT_ARRAY_BUFFER,
-                (self.pos.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-                std::mem::transmute(self.pos.as_ptr()),
-                gl::STATIC_DRAW,
-            );
+            let pos = Buffer::new(gl::ARRAY_BUFFER, &self.pos, gl::STATIC_DRAW);
 
             // TODO: norm, col, uv, tan, ...
 
-            // Vertex Array Object
-            gl::GenVertexArrays(1, &mut vao);
-            gl::BindVertexArray(vao);
+            // Relationship with VAO ans VBO;
+            vao.init(|| {
+                // Bind positions
+                pos.vertex_attrib_pointer(0, 3, gl::FLOAT, 0);
+                vbo.push(pos);
 
-            // Bind indices
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, index);
+                // TODO: Bind norm, col, uv, tan, ...
 
-            // Bind positions
-            gl::BindBuffer(gl::ARRAY_BUFFER, pos);
-            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null());
-            gl::EnableVertexAttribArray(0);
+                // Unbind VBO
+                gl::BindBuffer(gl::ARRAY_BUFFER, 0);
 
-            // TODO: Bind norm, col, uv, tan, ...
-
-            gl::BindVertexArray(0);
+                // REMEMBER: do NOT unbind the IBO while a VAO is active as the bound index buffer object IS stored in the VAO; keep the IBO bound.
+                //gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
+            });
         }
 
         Mesh {
@@ -132,8 +94,9 @@ impl MeshBuilder<Fully, Fully> {
 
 #[allow(dead_code)]
 impl<Positions> MeshBuilder<Empty, Positions> {
-    pub fn indices(mut self, indices: &[f32]) -> MeshBuilder<Fully, Positions> {
-        self.indices.copy_from_slice(indices);
+    pub fn indices(mut self, indices: &[i32]) -> MeshBuilder<Fully, Positions> {
+        self.indices = Vec::new();
+        self.indices.extend(indices.iter().cloned());
         MeshBuilder {
             indices: self.indices,
             pos: self.pos,
@@ -148,8 +111,9 @@ impl<Positions> MeshBuilder<Empty, Positions> {
 
 #[allow(dead_code)]
 impl<Indices> MeshBuilder<Indices, Empty> {
-    pub fn positions(mut self, pos: &[f32]) -> MeshBuilder<Indices, Empty> {
-        self.pos.copy_from_slice(pos);
+    pub fn positions(mut self, pos: &[f32]) -> MeshBuilder<Indices, Fully> {
+        self.pos = Vec::new();
+        self.pos.extend(pos.iter().cloned());
         MeshBuilder {
             indices: self.indices,
             pos: self.pos,
