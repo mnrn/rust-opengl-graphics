@@ -6,6 +6,7 @@ pub struct Buffer {
 }
 
 impl Drop for Buffer {
+    // Delete the buffer
     fn drop(&mut self) {
         unsafe {
             gl::DeleteBuffers(1, &self.id);

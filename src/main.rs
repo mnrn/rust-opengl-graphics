@@ -8,7 +8,7 @@ use crate::core::framework::FrameworkBuilder;
 
 fn main() -> Result<(), String> {
     let fw = FrameworkBuilder::new()
-        .window("App Framework", common::WINDOW_WIDTH, common::WINDOW_HEIGHT)
+        .window("Hello Triangle!", common::WINDOW_WIDTH, common::WINDOW_HEIGHT)
         .build()?;
 
     let ctx = fw.context();
