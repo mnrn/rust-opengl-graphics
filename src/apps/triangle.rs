@@ -22,6 +22,7 @@ pub struct TriangleApp {
     mvp: Matrix4,
 }
 
+#[allow(dead_code)]
 impl TriangleApp {
     pub fn new() -> TriangleApp {
         let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl").unwrap();

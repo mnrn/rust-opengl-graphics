@@ -1,7 +1,7 @@
 mod apps;
 mod core;
 
-use crate::apps::triangle::TriangleApp;
+use crate::apps::minimal::MinimalApp;
 use crate::core::common;
 use crate::core::framework::FrameworkBuilder;
 
@@ -10,7 +10,7 @@ fn main() -> Result<(), String> {
         .window("App Framework", common::WINDOW_WIDTH, common::WINDOW_HEIGHT)
         .build()?;
 
-    let app = TriangleApp::new();
+    let app = MinimalApp::new();
 
     fw.run(app)
 }
