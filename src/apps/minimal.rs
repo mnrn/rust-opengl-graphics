@@ -1,5 +1,5 @@
 use crate::core::app::App;
-use crate::core::common;
+use crate::core::framework::Context;
 use crate::core::shader::Shader;
 use crate::core::vertex::VertexArray;
 
@@ -9,8 +9,8 @@ pub struct MinimalApp {
 }
 
 #[allow(dead_code)]
-impl MinimalApp {
-    pub fn new() -> MinimalApp {
+impl App for MinimalApp {
+    fn new(_: &Context) -> MinimalApp {
         let shader = Shader::new("res/glsl/triangle.vs.glsl", "res/glsl/triangle.fs.glsl").unwrap();
         let vao = VertexArray::new();
 
@@ -19,17 +19,10 @@ impl MinimalApp {
             shader: shader,
         }
     }
-}
 
-impl App for MinimalApp {
-    fn render(&self) -> Result<(), String> {
+    fn render(&self, ctx: &Context) -> Result<(), String> {
         unsafe {
-            gl::Viewport(
-                0,
-                0,
-                common::WINDOW_WIDTH as i32,
-                common::WINDOW_HEIGHT as i32,
-            );
+            ctx.set_viewport();
 
             gl::ClearColor(1.0, 1.0, 1.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);

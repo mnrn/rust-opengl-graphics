@@ -6,26 +6,47 @@ use sdl2::keyboard::Keycode;
 
 use super::app::App;
 
+pub struct Context {
+    width: u32,
+    height: u32,
+    _gl: sdl2::video::GLContext,
+    sdl: sdl2::Sdl,
+}
+
+impl Context {
+    pub unsafe fn set_viewport(&self) {
+        gl::Viewport(0, 0, self.width as i32, self.height as i32);
+    }
+
+    pub fn aspect(&self) -> f32 {
+        assert!(self.height != 0);
+        self.width as f32 / self.height as f32
+    }
+}
+
 pub struct Framework {
     window: sdl2::video::Window,
-    _gl_ctx: sdl2::video::GLContext,
-    sdl_ctx: sdl2::Sdl,
+    ctx: Context,
 }
 
 impl Framework {
+    pub fn context(&self) -> &Context {
+        &self.ctx
+    }
+
     pub fn run<A>(&self, app: A) -> Result<(), String>
     where
         A: App,
     {
-        let mut event_pump = self.sdl_ctx.event_pump()?;
+        let mut event_pump = self.ctx.sdl.event_pump()?;
 
         // Event Loop
         'running: loop {
             // Update Application
-            app.update()?;
+            app.update(&self.ctx)?;
 
             // Render Application
-            app.render()?;
+            app.render(&self.ctx)?;
 
             // Swap framebuffer
             self.window.gl_swap_window();
@@ -45,7 +66,7 @@ impl Framework {
         }
 
         // Destroy Application
-        app.destroy()
+        app.destroy(&self.ctx)
     }
 }
 
@@ -116,8 +137,12 @@ impl FrameworkBuilder<Fully> {
 
         Ok(Framework {
             window: window,
-            _gl_ctx: gl_context,
-            sdl_ctx: sdl_context,
+            ctx: Context {
+                width: self.width,
+                height: self.height,
+                _gl: gl_context,
+                sdl: sdl_context,
+            },
         })
     }
 }

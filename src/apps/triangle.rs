@@ -4,7 +4,7 @@ use cgmath::prelude::SquareMatrix;
 
 use crate::core::app::App;
 use crate::core::buffer::Buffer;
-use crate::core::common;
+use crate::core::framework::Context;
 use crate::core::shader::Shader;
 use crate::core::vertex::VertexArray;
 
@@ -23,8 +23,9 @@ pub struct TriangleApp {
 }
 
 #[allow(dead_code)]
-impl TriangleApp {
-    pub fn new() -> TriangleApp {
+
+impl App for TriangleApp {
+    fn new(ctx: &Context) -> TriangleApp {
         let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl").unwrap();
 
         let vertices = [
@@ -55,12 +56,7 @@ impl TriangleApp {
                 z: 0.0,
             },
         );
-        let proj = perspective(
-            cgmath::Deg(60.0f32),
-            common::WINDOW_WIDTH as f32 / common::WINDOW_HEIGHT as f32,
-            0.1,
-            100.0,
-        );
+        let proj = perspective(cgmath::Deg(60.0f32), ctx.aspect(), 0.1, 100.0);
 
         TriangleApp {
             vao: vao,
@@ -69,17 +65,10 @@ impl TriangleApp {
             mvp: proj * view * model,
         }
     }
-}
 
-impl App for TriangleApp {
-    fn render(&self) -> Result<(), String> {
+    fn render(&self, ctx: &Context) -> Result<(), String> {
         unsafe {
-            gl::Viewport(
-                0,
-                0,
-                common::WINDOW_WIDTH as i32,
-                common::WINDOW_HEIGHT as i32,
-            );
+            ctx.set_viewport();
 
             gl::ClearColor(1.0, 1.0, 1.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);

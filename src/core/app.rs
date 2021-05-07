@@ -1,11 +1,15 @@
+use super::framework::Context;
+
+#[allow(unused_variables)]
 pub trait App {
-    fn update(&self) -> Result<(), String> {
+    fn new(ctx: &Context) -> Self;
+    fn update(&self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
-    fn render(&self) -> Result<(), String> {
+    fn render(&self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
-    fn destroy(&self) -> Result<(), String> {
+    fn destroy(&self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
 }
