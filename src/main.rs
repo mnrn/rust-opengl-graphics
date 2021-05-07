@@ -1,107 +1,16 @@
-use c_str_macro::c_str;
-use cgmath::perspective;
-use cgmath::prelude::SquareMatrix;
+mod apps;
+mod core;
 
-mod app;
-mod buffer;
-mod framework;
-mod mesh;
-mod shader;
-mod vertex;
-
-use app::App;
-use buffer::Buffer;
-use framework::FrameworkBuilder;
-use shader::Shader;
-use vertex::VertexArray;
-
-#[allow(dead_code)]
-type Point3 = cgmath::Point3<f32>;
-#[allow(dead_code)]
-type Vector3 = cgmath::Vector3<f32>;
-#[allow(dead_code)]
-type Matrix4 = cgmath::Matrix4<f32>;
-
-const WINDOW_WIDTH: u32 = 1280;
-const WINDOW_HEIGHT: u32 = 720;
-
-struct MyApp {
-    vao: VertexArray,
-    _vbo: Buffer,
-    shader: Shader,
-    mvp: Matrix4,
-}
-
-impl MyApp {
-    fn new() -> MyApp {
-        let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl").unwrap();
-
-        let vertices = [
-            -0.5f32, -0.5f32, 0.0f32, 0.5f32, -0.5f32, 0.0f32, 0.0f32, 0.5f32, 0.0f32,
-        ];
-        let vao = VertexArray::new();
-        let vbo = Buffer::new(gl::ARRAY_BUFFER, &vertices, gl::STATIC_DRAW);
-        vao.init(|| unsafe {
-            vbo.vertex_attrib_pointer(0, 3, gl::FLOAT, 0);
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-        });
-
-        let model = Matrix4::identity();
-        let view = Matrix4::look_at_rh(
-            Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: -2.5,
-            },
-            Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            Vector3 {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            },
-        );
-        let proj = perspective(
-            cgmath::Deg(60.0f32),
-            WINDOW_WIDTH as f32 / WINDOW_HEIGHT as f32,
-            0.1,
-            100.0,
-        );
-
-        MyApp {
-            vao: vao,
-            _vbo: vbo,
-            shader: shader,
-            mvp: proj * view * model,
-        }
-    }
-}
-
-impl App for MyApp {
-    fn render(&self) -> Result<(), String> {
-        unsafe {
-            gl::Viewport(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32);
-
-            gl::ClearColor(1.0, 1.0, 1.0, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            self.shader.use_program();
-            self.shader.set_mat4(c_str!("MVP"), &self.mvp);
-            self.vao.draw_arrays(gl::TRIANGLES, 0, 3);
-        }
-        Ok(())
-    }
-}
+use crate::apps::triangle::TriangleApp;
+use crate::core::common;
+use crate::core::framework::FrameworkBuilder;
 
 fn main() -> Result<(), String> {
     let fw = FrameworkBuilder::new()
-        .window("App Framework", WINDOW_WIDTH, WINDOW_HEIGHT)
+        .window("App Framework", common::WINDOW_WIDTH, common::WINDOW_HEIGHT)
         .build()?;
 
-    let app = MyApp::new();
+    let app = TriangleApp::new();
 
     fw.run(app)
 }

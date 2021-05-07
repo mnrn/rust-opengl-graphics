@@ -21,10 +21,16 @@ impl Framework {
 
         // Event Loop
         'running: loop {
+            // Update Application
             app.update()?;
+
+            // Render Application
             app.render()?;
 
+            // Swap framebuffer
             self.window.gl_swap_window();
+
+            // Pull Event
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. }
@@ -38,6 +44,7 @@ impl Framework {
             ::std::thread::sleep(std::time::Duration::new(0, 1_000_000_000u32 / 60));
         }
 
+        // Destroy Application
         app.destroy()
     }
 }
