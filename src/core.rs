@@ -4,4 +4,5 @@ pub mod common;
 pub mod framework;
 pub mod mesh;
 pub mod shader;
+pub mod texture;
 pub mod vertex;
