@@ -1,2 +1,3 @@
+pub mod hello_triangle;
 pub mod minimal;
-pub mod triangle;
+pub mod texture_mapping;

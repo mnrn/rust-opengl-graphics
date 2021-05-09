@@ -1,3 +1,5 @@
+use std::os::raw::c_void;
+
 use gl::types::*;
 
 pub struct Buffer {
@@ -28,6 +30,7 @@ impl Buffer {
                 std::mem::transmute(data.as_ptr()),
                 usage,
             );
+            gl::BindBuffer(target, 0);
         }
         Buffer {
             id: buf,
@@ -35,15 +38,31 @@ impl Buffer {
         }
     }
 
-    pub unsafe fn vertex_attrib_pointer(
+    pub unsafe fn bind(&self) {
+        gl::BindBuffer(self.target, self.id);
+    }
+
+    pub unsafe fn unbind(&self) {
+        gl::BindBuffer(self.target, 0);
+    }
+
+    pub unsafe fn vertex_input_attrib(
         &self,
         index: GLuint,
         size: GLint,
-        _type: GLenum,
-        stride: GLsizei,
+        stride: usize,
+        offset: usize,
     ) {
         gl::BindBuffer(self.target, self.id);
         gl::EnableVertexAttribArray(index);
-        gl::VertexAttribPointer(index, size, _type, gl::FALSE, stride, std::ptr::null());
+        gl::VertexAttribPointer(
+            index,
+            size,
+            gl::FLOAT,
+            gl::FALSE,
+            (stride * std::mem::size_of::<GLfloat>()) as GLsizei,
+            (offset * std::mem::size_of::<GLfloat>()) as *const c_void,
+        );
+        gl::BindBuffer(self.target, 0);
     }
 }

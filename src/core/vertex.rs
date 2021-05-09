@@ -24,30 +24,34 @@ impl VertexArray {
         VertexArray { id: vao }
     }
 
-    pub unsafe fn draw_arrays(&self, mode: GLenum, first: GLint, count: GLsizei) {
-        gl::BindVertexArray(self.id);
-        gl::DrawArrays(mode, first, count);
-        gl::BindVertexArray(0);
+    pub fn draw_arrays(&self, mode: GLenum, first: GLint, count: GLsizei) {
+        unsafe {
+            gl::BindVertexArray(self.id);
+            gl::DrawArrays(mode, first, count);
+            gl::BindVertexArray(0);
+        }
     }
 
-    pub unsafe fn draw_elements(
+    pub fn draw_elements(
         &self,
         mode: GLenum,
         count: GLsizei,
         indices_type: GLenum,
         offset: usize,
     ) {
-        gl::BindVertexArray(self.id);
-        gl::DrawElements(
-            mode,
-            count,
-            indices_type,
-            (offset * std::mem::size_of::<GLfloat>()) as *const c_void,
-        );
-        gl::BindVertexArray(0);
+        unsafe {
+            gl::BindVertexArray(self.id);
+            gl::DrawElements(
+                mode,
+                count,
+                indices_type,
+                (offset * std::mem::size_of::<GLfloat>()) as *const c_void,
+            );
+            gl::BindVertexArray(0);
+        }
     }
 
-    pub fn init<F>(&self, cb: F)
+    pub fn binding<F>(&self, cb: F)
     where
         F: FnOnce(),
     {

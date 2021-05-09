@@ -70,9 +70,9 @@ impl MeshBuilder<Fully, Fully> {
             // TODO: norm, col, uv, tan, ...
 
             // Relationship with VAO ans VBO;
-            vao.init(|| {
+            vao.binding(|| {
                 // Bind positions
-                pos.vertex_attrib_pointer(0, 3, gl::FLOAT, 0);
+                pos.vertex_input_attrib(0, 3, 0, 0);
                 vbo.push(pos);
 
                 // TODO: Bind norm, col, uv, tan, ...

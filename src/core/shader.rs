@@ -1,11 +1,12 @@
-use cgmath::Array;
-use cgmath::Matrix;
-use gl::types::*;
 
-use std::ffi::CStr;
+use std::ffi::CString;
 use std::fs::File;
 use std::io::Read;
 use std::str;
+
+use cgmath::Array;
+use cgmath::Matrix;
+use gl::types::*;
 
 #[allow(dead_code)]
 type Vector3 = cgmath::Vector3<f32>;
@@ -138,24 +139,53 @@ impl Shader {
         }
     }
 
-    pub unsafe fn use_program(&self) {
-        gl::UseProgram(self.id);
+    pub fn use_program(&self) {
+        unsafe {
+            gl::UseProgram(self.id);
+        }
     }
 
-    pub unsafe fn set_vec3(&self, name: &CStr, vec3: &Vector3) {
-        gl::Uniform3fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
-            1,
-            vec3.as_ptr(),
-        );
+    fn get_uniform_location_option(&self, name: &str) -> Option<Uniform> {
+        let c_name = CString::new(name).unwrap();
+        match unsafe { gl::GetUniformLocation(self.id, c_name.as_ptr()) } {
+            -1 => None,
+            loc => Some(Uniform{id: loc})
+        }
     }
 
-    pub unsafe fn set_mat4(&self, name: &CStr, mat4: &Matrix4) {
-        gl::UniformMatrix4fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
-            1,
-            gl::FALSE,
-            mat4.as_ptr(),
-        );
+    fn get_uniform_location(&self, name: &str) -> Uniform {
+        match self.get_uniform_location_option(name) {
+            Some(uni) => uni,
+            None => panic!("Could not find uniform \"{}\"", name)
+        }
     }
+
+    pub fn set_vec3(&self, name: &str, vec3: &Vector3) {
+        let uni = self.get_uniform_location(name);
+        unsafe {
+            gl::Uniform3fv(uni.id, 1, vec3.as_ptr());
+        }
+    }
+
+    pub fn set_mat4(&self, name: &str, mat4: &Matrix4) {
+        let uni = self.get_uniform_location(name);
+        unsafe {
+            gl::UniformMatrix4fv(uni.id, 1, gl::FALSE, mat4.as_ptr());
+        }
+    }
+
+    pub fn set_int(&self, name: &str, i: i32) {
+        let uni = self.get_uniform_location(name);
+        unsafe {
+            gl::Uniform1i(uni.id, i);
+        }
+    }
+
+    pub fn set_texture(&self, name: &str, tex: i32) {
+        self.set_int(name, tex);
+    }
+}
+
+struct Uniform {
+    pub id: GLint
 }

@@ -13,14 +13,29 @@ pub struct Context {
     sdl: sdl2::Sdl,
 }
 
+#[allow(dead_code)]
 impl Context {
-    pub unsafe fn set_viewport(&self) {
-        gl::Viewport(0, 0, self.width as i32, self.height as i32);
+    pub fn set_viewport(&self) {
+        unsafe {
+            gl::Viewport(0, 0, self.width as i32, self.height as i32);   
+        }
+    }
+
+    pub fn clear_buffer(&self, mask: gl::types::GLenum) {
+        unsafe {
+            gl::Clear(mask);
+        }
     }
 
     pub fn aspect(&self) -> f32 {
         assert!(self.height != 0);
         self.width as f32 / self.height as f32
+    }
+
+    pub fn set_clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
+        unsafe {
+            gl::ClearColor(r, g, b, a);
+        }
     }
 }
 
