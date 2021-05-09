@@ -15,15 +15,12 @@ type Matrix4 = cgmath::Matrix4<f32>;
 pub struct TextureMappingApp {
     shader: Shader,
     vao: VertexArray,
-    _vbo: Buffer,
-    _ibo: Buffer,
     tex: Texture2D,
 }
 
 #[allow(dead_code)]
 impl App for TextureMappingApp {
     fn new(ctx: &Context) -> TextureMappingApp {
-        
         ctx.set_viewport();
         ctx.set_clear_color(1.0, 1.0, 1.0, 1.0);
 
@@ -55,8 +52,6 @@ impl App for TextureMappingApp {
 
         TextureMappingApp {
             vao: vao,
-            _vbo: vbo,
-            _ibo: ibo,
             shader: shader,
             tex: tex,
         }
