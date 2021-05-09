@@ -45,7 +45,7 @@ impl App for TextureMappingApp {
         let vbo = Buffer::new(gl::ARRAY_BUFFER, &vertices, gl::STATIC_DRAW);
         let ibo = Buffer::new(gl::ELEMENT_ARRAY_BUFFER, &indices, gl::STATIC_DRAW);
 
-        vao.binding(|| unsafe {
+        vao.binding(|| {
             vbo.vertex_input_attrib(0, 3, 5, 0);
             vbo.vertex_input_attrib(1, 2, 5, 3);
             ibo.bind();

@@ -33,7 +33,7 @@ impl App for HelloTriangleApp {
         ];
         let vao = VertexArray::new();
         let vbo = Buffer::new(gl::ARRAY_BUFFER, &vertices, gl::STATIC_DRAW);
-        vao.binding(|| unsafe {
+        vao.binding(|| {
             vbo.vertex_input_attrib(0, 3, 0, 0);
         });
 
@@ -70,7 +70,7 @@ impl App for HelloTriangleApp {
         self.shader.use_program();
         self.shader.set_mat4("MVP", &self.mvp);
         self.vao.draw_arrays(gl::TRIANGLES, 0, 3);
-        
+
         Ok(())
     }
 }

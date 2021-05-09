@@ -38,31 +38,37 @@ impl Buffer {
         }
     }
 
-    pub unsafe fn bind(&self) {
-        gl::BindBuffer(self.target, self.id);
+    pub fn bind(&self) {
+        unsafe {
+            gl::BindBuffer(self.target, self.id);
+        }
     }
 
-    pub unsafe fn unbind(&self) {
-        gl::BindBuffer(self.target, 0);
+    pub fn unbind(&self) {
+        unsafe {
+            gl::BindBuffer(self.target, 0);
+        }
     }
 
-    pub unsafe fn vertex_input_attrib(
+    pub fn vertex_input_attrib(
         &self,
         index: GLuint,
         size: GLint,
         stride: usize,
         offset: usize,
     ) {
-        gl::BindBuffer(self.target, self.id);
-        gl::EnableVertexAttribArray(index);
-        gl::VertexAttribPointer(
-            index,
-            size,
-            gl::FLOAT,
-            gl::FALSE,
-            (stride * std::mem::size_of::<GLfloat>()) as GLsizei,
-            (offset * std::mem::size_of::<GLfloat>()) as *const c_void,
-        );
-        gl::BindBuffer(self.target, 0);
+        unsafe {
+            gl::BindBuffer(self.target, self.id);
+            gl::EnableVertexAttribArray(index);
+            gl::VertexAttribPointer(
+                index,
+                size,
+                gl::FLOAT,
+                gl::FALSE,
+                (stride * std::mem::size_of::<GLfloat>()) as GLsizei,
+                (offset * std::mem::size_of::<GLfloat>()) as *const c_void,
+            );
+            gl::BindBuffer(self.target, 0);
+        }
     }
 }
