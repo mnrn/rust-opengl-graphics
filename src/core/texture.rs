@@ -1,10 +1,7 @@
 use std::marker::PhantomData;
 use std::path::Path;
 
-use image::{
-    GenericImageView,
-    DynamicImage,
-};
+use image::{DynamicImage, GenericImageView};
 
 pub struct Texture2D {
     id: u32,
@@ -22,9 +19,17 @@ impl Drop for Texture2D {
 
 #[allow(dead_code)]
 impl Texture2D {
-    pub fn new<P>(path: P, min_filter: u32, mag_filter: u32,wrap_s: u32, wrap_t: u32, generate_mipmap: bool) 
-        -> Result<Texture2D, String> where P: AsRef<Path> {
-
+    pub fn new<P>(
+        path: P,
+        min_filter: u32,
+        mag_filter: u32,
+        wrap_s: u32,
+        wrap_t: u32,
+        generate_mipmap: bool,
+    ) -> Result<Texture2D, String>
+    where
+        P: AsRef<Path>,
+    {
         // Load Image
         let img: DynamicImage = image::open(path).expect("failed to load image");
         let (w, h) = img.dimensions();
@@ -35,7 +40,7 @@ impl Texture2D {
             DynamicImage::ImageRgba8(_) => gl::RGBA,
             DynamicImage::ImageBgr8(_) => gl::RGB,
             DynamicImage::ImageBgra8(_) => gl::RGBA,
-            _ => unreachable!()
+            _ => unreachable!(),
         };
         let data = img.into_bytes();
 
@@ -63,7 +68,7 @@ impl Texture2D {
                 0,
                 format,
                 gl::UNSIGNED_BYTE,
-                std::mem::transmute(data.as_ptr())
+                std::mem::transmute(data.as_ptr()),
             );
             if generate_mipmap {
                 gl::GenerateMipmap(gl::TEXTURE_2D);
@@ -75,15 +80,18 @@ impl Texture2D {
         Ok(Texture2D { id: tex })
     }
 
-    pub fn binding<F>(&self, cb: F) where F: FnOnce() {
+    pub fn binding<F>(&self, cb: F)
+    where
+        F: FnOnce(),
+    {
         unsafe {
-            gl::BindTexture(gl::TEXTURE_2D, self.id); 
+            gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
 
         cb();
 
-        unsafe { 
-            gl::BindTexture(gl::TEXTURE_2D, 0); 
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
     }
 }
@@ -100,7 +108,12 @@ pub struct TextureBuilder<MinFilter, MagFilter, WrapS, WrapT> {
     wrap_s: u32,
     wrap_t: u32,
     generate_mipmap: bool,
-    state: (PhantomData<MinFilter>, PhantomData<MagFilter>, PhantomData<WrapS>, PhantomData<WrapT>),
+    state: (
+        PhantomData<MinFilter>,
+        PhantomData<MagFilter>,
+        PhantomData<WrapS>,
+        PhantomData<WrapT>,
+    ),
 }
 
 #[allow(dead_code)]
@@ -158,7 +171,17 @@ impl TextureBuilder<Fully, Fully, Fully, Fully> {
         }
     }
 
-    pub fn build2d<P>(&self, path: P) -> Result<Texture2D, String> where P: AsRef<Path> {
-        Texture2D::new(path, self.min_filter, self.mag_filter, self.wrap_s, self.wrap_t, self.generate_mipmap)
+    pub fn build2d<P>(&self, path: P) -> Result<Texture2D, String>
+    where
+        P: AsRef<Path>,
+    {
+        Texture2D::new(
+            path,
+            self.min_filter,
+            self.mag_filter,
+            self.wrap_s,
+            self.wrap_t,
+            self.generate_mipmap,
+        )
     }
 }

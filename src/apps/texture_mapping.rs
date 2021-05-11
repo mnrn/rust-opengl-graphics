@@ -66,7 +66,7 @@ impl App for TextureMappingApp {
         ctx.clear_buffer(gl::COLOR_BUFFER_BIT);
 
         self.shader.use_program();
-        self.tex.binding(||{
+        self.tex.binding(|| {
             self.vao
                 .draw_elements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, 0);
         });

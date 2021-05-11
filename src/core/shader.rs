@@ -1,4 +1,3 @@
-
 use std::ffi::CString;
 use std::fs::File;
 use std::io::Read;
@@ -149,14 +148,14 @@ impl Shader {
         let c_name = CString::new(name).unwrap();
         match unsafe { gl::GetUniformLocation(self.id, c_name.as_ptr()) } {
             -1 => None,
-            loc => Some(Uniform{id: loc})
+            loc => Some(Uniform { id: loc }),
         }
     }
 
     fn get_uniform_location(&self, name: &str) -> Uniform {
         match self.get_uniform_location_option(name) {
             Some(uni) => uni,
-            None => panic!("Could not find uniform \"{}\"", name)
+            None => panic!("Could not find uniform \"{}\"", name),
         }
     }
 
@@ -187,5 +186,5 @@ impl Shader {
 }
 
 struct Uniform {
-    pub id: GLint
+    pub id: GLint,
 }

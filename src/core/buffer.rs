@@ -50,13 +50,7 @@ impl Buffer {
         }
     }
 
-    pub fn vertex_input_attrib(
-        &self,
-        index: GLuint,
-        size: GLint,
-        stride: usize,
-        offset: usize,
-    ) {
+    pub fn vertex_input_attrib(&self, index: GLuint, size: GLint, stride: usize, offset: usize) {
         unsafe {
             gl::BindBuffer(self.target, self.id);
             gl::EnableVertexAttribArray(index);

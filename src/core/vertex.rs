@@ -32,13 +32,7 @@ impl VertexArray {
         }
     }
 
-    pub fn draw_elements(
-        &self,
-        mode: GLenum,
-        count: GLsizei,
-        indices_type: GLenum,
-        offset: usize,
-    ) {
+    pub fn draw_elements(&self, mode: GLenum, count: GLsizei, indices_type: GLenum, offset: usize) {
         unsafe {
             gl::BindVertexArray(self.id);
             gl::DrawElements(

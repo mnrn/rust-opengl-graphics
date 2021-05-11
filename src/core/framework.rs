@@ -17,7 +17,7 @@ pub struct Context {
 impl Context {
     pub fn set_viewport(&self) {
         unsafe {
-            gl::Viewport(0, 0, self.width as i32, self.height as i32);   
+            gl::Viewport(0, 0, self.width as i32, self.height as i32);
         }
     }
 
