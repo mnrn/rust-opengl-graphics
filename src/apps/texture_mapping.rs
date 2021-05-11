@@ -3,6 +3,7 @@ use crate::core::buffer::Buffer;
 use crate::core::framework::Context;
 use crate::core::shader::Shader;
 use crate::core::texture::Texture2D;
+use crate::core::texture::TextureBuilder;
 use crate::core::vertex::VertexArray;
 
 #[allow(dead_code)]
@@ -48,7 +49,11 @@ impl App for TextureMappingApp {
             ibo.bind();
         });
 
-        let tex = Texture2D::new("res/textures/seamless/vintage_water.png").unwrap();
+        let tex = TextureBuilder::new()
+            .filter(gl::LINEAR)
+            .wrap(gl::REPEAT)
+            .build2d("res/textures/seamless/vintage_water.png")
+            .unwrap();
 
         TextureMappingApp {
             vao: vao,
