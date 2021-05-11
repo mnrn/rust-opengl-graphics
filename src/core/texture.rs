@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use image::{
     GenericImageView,
     DynamicImage,
@@ -81,4 +83,18 @@ impl Texture2D {
             gl::BindTexture(gl::TEXTURE_2D, 0); 
         }
     }
+}
+
+#[allow(dead_code)]
+pub struct Empty;
+#[allow(dead_code)]
+pub struct Fully;
+
+#[allow(dead_code)]
+pub struct Texture2DBuilder<WrapS, WrapT, MinFilter, MagFilter> {
+    wrap_s: i32,
+    wrap_t: i32,
+    min_filter: i32,
+    mag_filter: i32,
+    state: (PhantomData<WrapS>, PhantomData<WrapT>, PhantomData<MinFilter>, PhantomData<MagFilter>),
 }
