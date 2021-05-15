@@ -5,8 +5,11 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 use super::app::App;
+use super::imgui::ImGui;
 
 pub struct Context {
+    window: sdl2::video::Window,
+    video: sdl2::VideoSubsystem,
     width: u32,
     height: u32,
     _gl: sdl2::video::GLContext,
@@ -37,37 +40,30 @@ impl Context {
             gl::ClearColor(r, g, b, a);
         }
     }
+
+    pub fn create_imgui(&self) -> ImGui {
+        ImGui::new(&self.window, &self.video)
+    }
 }
 
 pub struct Framework {
-    window: sdl2::video::Window,
     ctx: Context,
 }
 
 impl Framework {
-    pub fn context(&self) -> &Context {
-        &self.ctx
-    }
-
-    pub fn run<A>(&self, app: A) -> Result<(), String>
+    pub fn run<A>(&self) -> Result<(), String>
     where
         A: App,
     {
+        let mut app = A::new(&self.ctx);
+
         let mut event_pump = self.ctx.sdl.event_pump()?;
 
         // Event Loop
         'running: loop {
-            // Update Application
-            app.update(&self.ctx)?;
-
-            // Render Application
-            app.render(&self.ctx)?;
-
-            // Swap framebuffer
-            self.window.gl_swap_window();
-
             // Pull Event
             for event in event_pump.poll_iter() {
+                app.event(&event)?;
                 match event {
                     Event::Quit { .. }
                     | Event::KeyDown {
@@ -77,7 +73,20 @@ impl Framework {
                     _ => {}
                 }
             }
-            ::std::thread::sleep(std::time::Duration::new(0, 1_000_000_000u32 / 60));
+
+            // Update Application
+            app.update(&self.ctx)?;
+
+            // Render Application
+            app.render(&self.ctx)?;
+
+            // UI Overray
+            app.ui_overray(&self.ctx)?;
+
+            // Swap framebuffer
+            self.ctx.window.gl_swap_window();
+
+            std::thread::sleep(std::time::Duration::new(0, 1_000_000_000u32 / 60));
         }
 
         // Destroy Application
@@ -151,8 +160,9 @@ impl FrameworkBuilder<Fully> {
         gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
         Ok(Framework {
-            window: window,
             ctx: Context {
+                window: window,
+                video: video_subsystem,
                 width: self.width,
                 height: self.height,
                 _gl: gl_context,

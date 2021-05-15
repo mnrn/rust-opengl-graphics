@@ -2,7 +2,6 @@ mod apps;
 mod core;
 
 use crate::apps::texture_mapping::TextureMappingApp;
-use crate::core::app::App;
 use crate::core::common;
 use crate::core::framework::FrameworkBuilder;
 
@@ -15,8 +14,5 @@ fn main() -> Result<(), String> {
         )
         .build()?;
 
-    let ctx = fw.context();
-    let app = TextureMappingApp::new(ctx);
-
-    fw.run(app)
+    fw.run::<TextureMappingApp>()
 }
