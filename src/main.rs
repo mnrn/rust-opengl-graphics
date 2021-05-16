@@ -2,17 +2,14 @@ mod apps;
 mod core;
 
 use crate::apps::texture_mapping::TextureMappingApp;
-use crate::core::common;
 use crate::core::framework::FrameworkBuilder;
 
-fn main() -> Result<(), String> {
-    let fw = FrameworkBuilder::new()
-        .window(
-            "Hello Triangle!",
-            common::WINDOW_WIDTH,
-            common::WINDOW_HEIGHT,
-        )
-        .build()?;
+const WINDOW_WIDTH: u32 = 1280;
+const WINDOW_HEIGHT: u32 = 720;
 
-    fw.run::<TextureMappingApp>()
+fn main() -> Result<(), String> {
+    FrameworkBuilder::new()
+        .window("Hello Triangle!", WINDOW_WIDTH, WINDOW_HEIGHT)
+        .build()?
+        .run::<TextureMappingApp>()
 }

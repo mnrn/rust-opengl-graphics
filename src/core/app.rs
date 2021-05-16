@@ -18,4 +18,5 @@ pub trait App {
     fn event(&mut self, ev: &sdl2::event::Event) -> Result<(), String> {
         Ok(())
     }
+    fn resized(&mut self, width: u32, height: u32) {}
 }

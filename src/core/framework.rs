@@ -1,19 +1,18 @@
 use std::default::Default;
 use std::marker::PhantomData;
+use std::sync::mpsc::Receiver;
 
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use glfw::{Action, Key};
 
 use super::app::App;
 use super::imgui::ImGui;
 
 pub struct Context {
-    window: sdl2::video::Window,
-    video: sdl2::VideoSubsystem,
+    glfw: glfw::Glfw,
+    window: glfw::Window,
+    events: Receiver<(f64, glfw::WindowEvent)>,
     width: u32,
     height: u32,
-    _gl: sdl2::video::GLContext,
-    sdl: sdl2::Sdl,
 }
 
 #[allow(dead_code)]
@@ -41,8 +40,18 @@ impl Context {
         }
     }
 
-    pub fn create_imgui(&self) -> ImGui {
-        ImGui::new(&self.window, &self.video)
+    fn process_events(&mut self) {
+        for (_, event) in glfw::flush_messages(&self.events) {
+            match event {
+                glfw::WindowEvent::FramebufferSize(width, height) => unsafe {
+                    gl::Viewport(0, 0, width, height)
+                },
+                glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+                    self.window.set_should_close(true)
+                }
+                _ => {}
+            }
+        }
     }
 }
 
@@ -51,42 +60,26 @@ pub struct Framework {
 }
 
 impl Framework {
-    pub fn run<A>(&self) -> Result<(), String>
+    pub fn run<A>(&mut self) -> Result<(), String>
     where
         A: App,
     {
         let mut app = A::new(&self.ctx);
 
-        let mut event_pump = self.ctx.sdl.event_pump()?;
+        // Render loop
+        while !self.ctx.window.should_close() {
+            // Events
+            self.ctx.process_events();
 
-        // Event Loop
-        'running: loop {
-            // Pull Event
-            for event in event_pump.poll_iter() {
-                app.event(&event)?;
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    _ => {}
-                }
-            }
-
-            // Update Application
+            // App update
             app.update(&self.ctx)?;
 
-            // Render Application
+            // App render
             app.render(&self.ctx)?;
 
-            // UI Overray
-            app.ui_overray(&self.ctx)?;
-
-            // Swap framebuffer
-            self.ctx.window.gl_swap_window();
-
-            std::thread::sleep(std::time::Duration::new(0, 1_000_000_000u32 / 60));
+            // glfw: Swap buffers and poll IO events(key pressed/released, mouse moved etc.)
+            glfw::Context::swap_buffers(&mut self.ctx.window);
+            self.ctx.glfw.poll_events();
         }
 
         // Destroy Application
@@ -135,38 +128,40 @@ impl FrameworkBuilder<Empty> {
 
 impl FrameworkBuilder<Fully> {
     pub fn build(self) -> Result<Framework, String> {
-        let sdl_context = sdl2::init()?;
-        let video_subsystem = sdl_context.video()?;
+        // glfw: initialize and configure
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        glfw.window_hint(glfw::WindowHint::ContextVersion(4, 1));
+        glfw.window_hint(glfw::WindowHint::OpenGlProfile(
+            glfw::OpenGlProfileHint::Core,
+        ));
+        glfw.window_hint(glfw::WindowHint::Resizable(false));
+        #[cfg(target_os = "macos")]
+        glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+        #[cfg(debug_assertions)]
+        glfw.window_hint(glfw::WindowHint::OpenGlDebugContext(true));
 
-        // Init OpenGL
-        let gl_attr = video_subsystem.gl_attr();
-        gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
-        gl_attr.set_context_version(4, 1);
-        let (major, minor) = gl_attr.context_version();
-        debug_assert_eq!(gl_attr.context_profile(), sdl2::video::GLProfile::Core);
-        debug_assert_eq!(gl_attr.context_version(), (4, 1));
-        println!("OK! Init OpenGL Version = {}.{}", major, minor);
+        // glfw window creation
+        let (mut window, events) = glfw
+            .create_window(
+                self.width,
+                self.height,
+                &self.title,
+                glfw::WindowMode::Windowed,
+            )
+            .expect("Failed to create GLFW window");
+        glfw::Context::make_current(&mut window);
+        window.set_key_polling(true);
+        window.set_framebuffer_size_polling(true);
 
-        // Create Framework
-        let window = video_subsystem
-            .window(&self.title, self.width, self.height)
-            .opengl()
-            .position_centered()
-            .build()
-            .unwrap();
-
-        // Load OpenGL
-        let gl_context = window.gl_create_context()?;
-        gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
+        gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
         Ok(Framework {
             ctx: Context {
+                glfw: glfw,
                 window: window,
-                video: video_subsystem,
+                events: events,
                 width: self.width,
                 height: self.height,
-                _gl: gl_context,
-                sdl: sdl_context,
             },
         })
     }
