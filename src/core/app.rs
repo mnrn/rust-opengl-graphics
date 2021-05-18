@@ -1,4 +1,5 @@
 use super::framework::Context;
+use imgui_glfw_rs::imgui;
 
 #[allow(unused_variables)]
 pub trait App {
@@ -9,14 +10,15 @@ pub trait App {
     fn render(&self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
-    fn ui_overray(&mut self, ctx: &Context) -> Result<(), String> {
-        Ok(())
+    fn ui_overlay<'a>(&self, ui: imgui::Ui<'a>) -> Option<imgui::Ui<'a>> {
+        None
     }
     fn destroy(&mut self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
-    fn event(&mut self, ev: &sdl2::event::Event) -> Result<(), String> {
+
+    fn resized(&mut self, ctx: &Context, width: u32, height: u32) -> Result<(), String> {
+        ctx.set_viewport();
         Ok(())
     }
-    fn resized(&mut self, width: u32, height: u32) {}
 }
