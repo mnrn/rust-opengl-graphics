@@ -10,8 +10,8 @@ pub trait App {
     fn render(&self, ctx: &Context) -> Result<(), String> {
         Ok(())
     }
-    fn ui_overlay<'a>(&self, ui: imgui::Ui<'a>) -> Option<imgui::Ui<'a>> {
-        None
+    fn ui_overlay<'a>(&self, ui: imgui::Ui<'a>) -> imgui::Ui<'a> {
+        ui
     }
     fn destroy(&mut self, ctx: &Context) -> Result<(), String> {
         Ok(())

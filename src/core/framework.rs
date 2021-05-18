@@ -57,9 +57,8 @@ impl Context {
         A: App,
     {
         if let Some(ref mut imgui) = self.imgui {
-            if let Some(ui) = app.ui_overlay(imgui.glfw.frame(&mut self.window, &mut imgui.ctx)) {
-                imgui.glfw.draw(ui, &mut self.window);
-            }
+            let ui = app.ui_overlay(imgui.glfw.frame(&mut self.window, &mut imgui.ctx));
+            imgui.glfw.draw(ui, &mut self.window);
         }
     }
 

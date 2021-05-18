@@ -18,8 +18,8 @@ impl App for ImGuiApp {
         Ok(())
     }
 
-    fn ui_overlay<'a>(&self, ui: imgui::Ui<'a>) -> Option<imgui::Ui<'a>> {
+    fn ui_overlay<'a>(&self, ui: imgui::Ui<'a>) -> imgui::Ui<'a> {
         ui.show_demo_window(&mut true);
-        Some(ui)
+        ui
     }
 }
