@@ -3,14 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::str;
 
-use cgmath::Array;
-use cgmath::Matrix;
 use gl::types::*;
-
-#[allow(dead_code)]
-type Vector3 = cgmath::Vector3<f32>;
-#[allow(dead_code)]
-type Matrix4 = cgmath::Matrix4<f32>;
+use nalgebra::{Matrix4, Vector3};
 
 pub struct Shader {
     id: u32,
@@ -159,14 +153,14 @@ impl Shader {
         }
     }
 
-    pub fn set_vec3(&self, name: &str, vec3: &Vector3) {
+    pub fn set_vec3(&self, name: &str, vec3: &Vector3<f32>) {
         let uni = self.get_uniform_location(name);
         unsafe {
             gl::Uniform3fv(uni.id, 1, vec3.as_ptr());
         }
     }
 
-    pub fn set_mat4(&self, name: &str, mat4: &Matrix4) {
+    pub fn set_mat4(&self, name: &str, mat4: &Matrix4<f32>) {
         let uni = self.get_uniform_location(name);
         unsafe {
             gl::UniformMatrix4fv(uni.id, 1, gl::FALSE, mat4.as_ptr());

@@ -1,5 +1,4 @@
-use cgmath::perspective;
-use cgmath::prelude::SquareMatrix;
+use nalgebra::{Matrix4, Perspective3, Point3, Vector3};
 
 use crate::core::app::App;
 use crate::core::buffer::Buffer;
@@ -7,17 +6,10 @@ use crate::core::framework::Context;
 use crate::core::shader::Shader;
 use crate::core::vertex::VertexArray;
 
-#[allow(dead_code)]
-type Point3 = cgmath::Point3<f32>;
-#[allow(dead_code)]
-type Vector3 = cgmath::Vector3<f32>;
-#[allow(dead_code)]
-type Matrix4 = cgmath::Matrix4<f32>;
-
 pub struct HelloTriangleApp {
     vao: VertexArray,
     shader: Shader,
-    mvp: Matrix4,
+    mvp: Matrix4<f32>,
 }
 
 #[allow(dead_code)]
@@ -29,7 +21,7 @@ impl App for HelloTriangleApp {
         let shader = Shader::new("res/glsl/basic.vs.glsl", "res/glsl/basic.fs.glsl").unwrap();
 
         let vertices = [
-            -0.5f32, -0.5f32, 0.0f32, 0.5f32, -0.5f32, 0.0f32, 0.0f32, 0.5f32, 0.0f32,
+            -1.0f32, -1.0f32, 0.0f32, 1.0f32, -1.0f32, 0.0f32, 0.0f32, 1.0f32, 0.0f32,
         ];
         let vao = VertexArray::new();
         let vbo = Buffer::new(gl::ARRAY_BUFFER, &vertices, gl::STATIC_DRAW);
@@ -38,29 +30,15 @@ impl App for HelloTriangleApp {
         });
 
         let model = Matrix4::identity();
-        let view = Matrix4::look_at_rh(
-            Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: -2.5,
-            },
-            Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            Vector3 {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            },
-        );
-        let proj = perspective(cgmath::Deg(60.0f32), ctx.aspect(), 0.1, 100.0);
+        let eye = Point3::new(0.0f32, 0.0, -2.5);
+        let target = Point3::new(0.0, 0.0, 0.0);
+        let view = Matrix4::look_at_rh(&eye, &target, &Vector3::y());
+        let proj = Perspective3::new(ctx.aspect(), 2.1, 0.1, 100.0);
 
         HelloTriangleApp {
             vao: vao,
             shader: shader,
-            mvp: proj * view * model,
+            mvp: proj.as_matrix() * view * model,
         }
     }
 

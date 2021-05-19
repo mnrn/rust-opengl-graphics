@@ -6,13 +6,6 @@ use crate::core::texture::Texture2D;
 use crate::core::texture::TextureBuilder;
 use crate::core::vertex::VertexArray;
 
-#[allow(dead_code)]
-type Point3 = cgmath::Point3<f32>;
-#[allow(dead_code)]
-type Vector3 = cgmath::Vector3<f32>;
-#[allow(dead_code)]
-type Matrix4 = cgmath::Matrix4<f32>;
-
 pub struct TextureMappingApp {
     shader: Shader,
     vao: VertexArray,
