@@ -29,7 +29,6 @@ impl Anim2D {
         self.index = self.index()
     }
 
-    // 現在再生しているアニメーションIDを取得します。
     pub fn index(&self) -> u32 {
         let keyframe = (self.time - self.started) / self.durations[self.index];
         self.keys[keyframe % self.keys.len()]

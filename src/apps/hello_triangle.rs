@@ -1,4 +1,4 @@
-use nalgebra::{Matrix4, Perspective3, Point3, Vector3};
+use nalgebra_glm as glm;
 
 use crate::core::app::App;
 use crate::core::buffer::Buffer;
@@ -9,7 +9,7 @@ use crate::core::vertex::VertexArray;
 pub struct HelloTriangleApp {
     vao: VertexArray,
     shader: Shader,
-    mvp: Matrix4<f32>,
+    mvp: glm::Mat4,
 }
 
 #[allow(dead_code)]
@@ -29,16 +29,17 @@ impl App for HelloTriangleApp {
             vbo.vertex_input_attrib(0, 3, 0, 0);
         });
 
-        let model = Matrix4::identity();
-        let eye = Point3::new(0.0f32, 0.0, -2.5);
-        let target = Point3::new(0.0, 0.0, 0.0);
-        let view = Matrix4::look_at_rh(&eye, &target, &Vector3::y());
-        let proj = Perspective3::new(ctx.aspect(), 2.1, 0.1, 100.0);
+        let model = glm::Mat4::identity();
+        let eye = glm::vec3(0.0, 0.0, -2.5);
+        let target = glm::vec3(0.0, 0.0, 0.0);
+        let view = glm::look_at_rh(&eye, &target, &glm::Vec3::y());
+        let fov = glm::radians(&glm::vec3(60.0, 60.0, 60.0));
+        let proj = glm::perspective(ctx.aspect(), fov.y, 0.1, 100.0);
 
         HelloTriangleApp {
             vao: vao,
             shader: shader,
-            mvp: proj.as_matrix() * view * model,
+            mvp: proj * view * model,
         }
     }
 

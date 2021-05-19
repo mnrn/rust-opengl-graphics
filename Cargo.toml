@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 gl = "0.14.0"
 glfw = "0.41.0"
-nalgebra = "0.26.2"
+nalgebra-glm = "0.12.0"
 c_str_macro = "1.0.3"
 image = "0.23.14"
 imgui = "0.7.0"
