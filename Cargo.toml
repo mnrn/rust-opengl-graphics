@@ -1,5 +1,5 @@
 [package]
-name = "rust-graphics"
+name = "rust-opengl-graphics"
 version = "0.1.0"
 authors = ["ayase <paper.airplane01@gmail.com>"]
 edition = "2018"

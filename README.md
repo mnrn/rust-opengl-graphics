@@ -1,3 +1,4 @@
-# Rust Graphics
+# Rust OpenGL Graphics
 
-Rust Graphics Example
+Rust OpenGL Graphics Examples です。  
+OpenGL -> wgpu へ移行予定です。
